@@ -1,16 +1,20 @@
+import sys
+import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib
+import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from matplotlib.patches import Patch
-import seaborn as sns
+sys.path.append(os.path.join(os.getcwd(), 'scripts'))
+from config import font_location
 
 
 def matplotlib_config():
     plt.style.use("seaborn-paper")
 
-    font_dir = [r"C:\Root\Download\computer-modern"]
+    font_dir = [font_location]
     for font in font_manager.findSystemFonts(font_dir):
         font_manager.fontManager.addfont(font)
 
@@ -34,21 +38,17 @@ def matplotlib_config():
     savefig = {"dpi": 300}
     matplotlib.rc("savefig", **savefig)
 
-    # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-    #     color=["004c6d", "125e7f", "217192", "3085a5", "3e99b7", "4dadc9", "5dc2dc", "6dd7ed", "7eedff"]
-    # )
     matplotlib.rcParams["ytick.labelsize"] = 15
     matplotlib.rcParams["xtick.labelsize"] = 15
 
 
 def consumo_de_agua():
-    matplotlib_config()
-    data = pd.read_csv("global-freshwater-use-over-the-long-run.csv")
-
+    data = pd.read_csv(r"scripts\introduction\global-freshwater-use-over-the-long-run.csv")
     filt = data["Entity"] == "World"
     pd.set_option('display.max_rows', 500)
     world_data = data.loc[filt]
     world_data["Freshwater use"] = world_data["Freshwater use"].apply(lambda x: int(x) / 1e9)
+
     fig, ax = plt.subplots(1, 1, figsize=(11, 7))
     ax.fill_between(world_data.loc[:, "Year"], world_data.loc[:, "Freshwater use"], alpha=0.6)
     ticks = np.linspace(world_data.loc[330, "Year"], world_data.loc[440, "Year"], 8)
@@ -56,15 +56,13 @@ def consumo_de_agua():
     ax.set_xticks(ticks)
     ax.set_ylabel(r"Consumo de água $\mathrm{km}^3 \cdot \mathrm{ano}^{-1}$")
     ax.set_xlabel("Anos")
-
     ax.grid()
-    fig.savefig("consumo_de_agua.pdf")
+
+    fig.savefig(r"models\graphs\consumo_de_agua.pdf")
     plt.show()
 
 
 def perdas_energeticas():
-    matplotlib_config()
-
     plt.rcParams['figure.figsize'] = (13.0, 8)
     data = {
         "centrais": ("Centrais elétricas", 55.7),
@@ -107,13 +105,11 @@ def perdas_energeticas():
     for i in range(len(x)):
         plt.text(i, y_num[i] + 0.5, y[i], ha='center', fontsize="16")
 
-    plt.savefig("perdas.pdf", bbox_inches="tight", transparent=True)
+    plt.savefig("models/graphs/perdas.pdf", bbox_inches="tight", transparent=True)
     plt.show()
 
 
 def consumo_energetico():
-    matplotlib_config()
-
     sizes = [26.8, 30.9, 23.2, 5.0, 2.5, 9.4, 2.2]
     labels = ["Carvão", "Petróleo", "Gás natural", "Nuclear", "Hidrelétrica", "Biocombustíveis e resíduos", "Outros"]
     colors = ["#004c6d", "#176486", "#2b7e9e", "#3e99b7", "#52b4cf", "#67d0e7", "#7eedff"]
@@ -135,9 +131,12 @@ def consumo_energetico():
     #     ax1.annotate(label, xy=(1.05 * x, 1.05 * y), xytext=(1.2 * x, 1.2 * y),
     #                  horizontalalignment=horizontalalignment, **kw, fontsize=15)
     plt.tight_layout()
-    plt.savefig("consumo_energetico.pdf", bbox_inches="tight")
+    plt.savefig("models/graphs/consumo_energetico.pdf", bbox_inches="tight")
     plt.show()
 
 
 if __name__ == "__main__":
+    matplotlib_config()
     consumo_de_agua()
+    perdas_energeticas()
+    consumo_energetico()
