@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.append(os.path.join(os.getcwd(), 'src'))
+# sys.path.append(os.path.join(os.getcwd(), 'src'))
+sys.path.append(os.getcwd())
 from ees.parametric_graphs import Graphs
 import pandas as pd
 import matplotlib
@@ -204,8 +205,8 @@ class HDHEffGraphsCombined:
         matplotlib.rcParams["font.family"] = "CMU Serif"
 
         axes = {
-            "labelsize": 24,
-            "titlesize": 16,
+            "labelsize": 30,
+            "titlesize": 26,
             "titleweight": "bold",
             "labelweight": "bold",
         }
@@ -214,7 +215,7 @@ class HDHEffGraphsCombined:
         lines = {"linewidth": 2}
         matplotlib.rc("lines", **lines)
 
-        legends = {"fontsize": 14}
+        legends = {"fontsize": 20}
         matplotlib.rc("legend", **legends)
 
         savefig = {"dpi": 300}
@@ -223,8 +224,8 @@ class HDHEffGraphsCombined:
         # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
         #     color=["r", "b", "g", "m", "k"]
         # )
-        matplotlib.rcParams["ytick.labelsize"] = 20
-        matplotlib.rcParams["xtick.labelsize"] = 20
+        matplotlib.rcParams["ytick.labelsize"] = 26
+        matplotlib.rcParams["xtick.labelsize"] = 26
         # matplotlib.rcParams["axes.edgecolor"] = "grey"
         matplotlib.rcParams["axes.grid"] = True
 
@@ -244,22 +245,22 @@ class HDHEffGraphsCombined:
         var_display_str = r"$ \varepsilon_{d} $"
 
         fig, ((ax_euf, ax_m38), (ax_exd, ax_psi)) = plt.subplots(2, 2, figsize=(18, 12))
-        ax_euf.set_title("Fator de utilização de Energia (EUF)")
+        # ax_euf.set_title("Fator de utilização de Energia (EUF)")
         ax_euf.set_xlabel(var_display_str)
         ax_euf.set_ylabel(r"EUF")
         ax_euf.set_title("a)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        ax_m38.set_title(r"Vazão de água dessalinizada ($\dot{m}_{38}$)")
+        # ax_m38.set_title(r"Vazão de água dessalinizada ($\dot{m}_{38}$)")
         ax_m38.set_xlabel(var_display_str)
         ax_m38.set_ylabel(r"$\dot{m}_{38}$ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)")
         ax_m38.set_title("b)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        ax_exd.set_title(r"Taxa de destruição de exergia parcial ($\dot{Ex}_{d,p}$)")
+        # ax_exd.set_title(r"Taxa de destruição de exergia parcial ($\dot{Ex}_{d,p}$)")
         ax_exd.set_xlabel(var_display_str)
         ax_exd.set_ylabel(r"$\dot{Ex}_{d,p}$ (kW)")
         ax_exd.set_title("c)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        ax_psi.set_title(r"Eficiência exergética parcial ($\psi_{p}$)")
+        # ax_psi.set_title(r"Eficiência exergética parcial ($\psi_{p}$)")
         ax_psi.set_xlabel(var_display_str)
         ax_psi.set_ylabel(r"$\psi_{p}$ (%)")
         ax_psi.set_title("d)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
@@ -301,11 +302,11 @@ class HDHEffGraphsCombined:
                     label=f"{legend_labels[model]}{epsilon_u}")
 
         lines, labels = ax_euf.get_legend_handles_labels()
-        fig.legend(lines, labels, bbox_to_anchor=(0, 0, 1, 0), loc='lower left', ncol=5, mode="expand")
+        fig.legend(lines, labels, bbox_to_anchor=(0, 0, 1, 0), loc='lower left', ncol=4, mode="expand")
 
         fig.tight_layout()
 
-        fig.subplots_adjust(bottom=0.13)
+        fig.subplots_adjust(bottom=0.198)
         fig.savefig(
             os.path.join(self.plots_folder, "epsilon_d.pdf"), bbox_inches='tight'
         )
@@ -318,47 +319,47 @@ def main():
     ]
 
     run_id = "exergy_correction"
-    variable_legend_locs = [
-        ["upper center", "best", "best", "best", "best", "best", "best", "lower right", "lower center"],
-        ["upper center", "best", "center left", "center right", "best", "best", "best", "lower right", "lower center"]
-    ]
-    for model_path, locs in zip(model_paths, variable_legend_locs):
-        graph = DefaultGraphsCombined(model_path, "X_biogas_ch4", run_id)
-        graph.base_plot(r'$ x_{CH_4} $', partial=False, loc=locs[0])
-        del graph
+    # variable_legend_locs = [
+    #     ["upper center", "best", "best", "best", "best", "best", "best", "lower right", "lower center"],
+    #     ["upper center", "best", "center left", "center right", "best", "best", "best", "lower right", "lower center"]
+    # ]
+    # for model_path, locs in zip(model_paths, variable_legend_locs):
+    #     graph = DefaultGraphsCombined(model_path, "X_biogas_ch4", run_id)
+    #     graph.base_plot(r'$ x_{CH_4} $', partial=False, loc=locs[0])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, "m_dot[9]", run_id)
-        graph.base_plot(r'$ \dot{m}_{9} $ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)', partial=False, loc=locs[1])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, "m_dot[9]", run_id)
+    #     graph.base_plot(r'$ \dot{m}_{9} $ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)', partial=False, loc=locs[1])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'T[10]', run_id)
-        graph.base_plot(r'$ T_{10} $ ($^{\circ}$C)', loc=locs[2])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'T[10]', run_id)
+    #     graph.base_plot(r'$ T_{10} $ ($^{\circ}$C)', loc=locs[2])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'T[13]', run_id)
-        graph.base_plot(r'$ T_{13} $ ($^{\circ}$C)', loc=locs[3])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'T[13]', run_id)
+    #     graph.base_plot(r'$ T_{13} $ ($^{\circ}$C)', loc=locs[3])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'T[19]', run_id)
-        graph.base_plot(r'$ T_{19} $ ($^{\circ}$C)', loc=locs[4])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'T[19]', run_id)
+    #     graph.base_plot(r'$ T_{19} $ ($^{\circ}$C)', loc=locs[4])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'T[22]', run_id)
-        graph.base_plot(r'$ T_{22} $ ($^{\circ}$C)', loc=locs[5])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'T[22]', run_id)
+    #     graph.base_plot(r'$ T_{22} $ ($^{\circ}$C)', loc=locs[5])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'epsilon_hx', run_id)
-        graph.base_plot(r'$ \varepsilon_{shx} $', loc=locs[6])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'epsilon_hx', run_id)
+    #     graph.base_plot(r'$ \varepsilon_{shx} $', loc=locs[6])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, "MR", run_id)
-        graph.base_plot("MR", loc=locs[7])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, "MR", run_id)
+    #     graph.base_plot("MR", loc=locs[7])
+    #     del graph
 
-        graph = DefaultGraphsCombined(model_path, 'T[34]', run_id)
-        graph.df.drop(index=6, inplace=True)
-        graph.base_plot(r'$ T_{34} $ ($^{\circ}$C)', loc=locs[8])
-        del graph
+    #     graph = DefaultGraphsCombined(model_path, 'T[34]', run_id)
+    #     graph.df.drop(index=6, inplace=True)
+    #     graph.base_plot(r'$ T_{34} $ ($^{\circ}$C)', loc=locs[8])
+    #     del graph
 
     graph = HDHEffGraphsCombined(model_paths, run_id)
     graph.base_plot()

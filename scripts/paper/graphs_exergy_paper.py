@@ -1,14 +1,16 @@
 import os
+import sys
+import itertools
 import matplotlib
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-import numpy as np
-import itertools
+sys.path.append(os.path.join(os.getcwd(), 'scripts'))
 
 
 def matploblib_config():
-    plt.style.use("ggplot")
+    plt.style.use("seaborn-paper")
 
     font_dir = [r"C:\Root\Download\computer-modern"]
     for font in font_manager.findSystemFonts(font_dir):
@@ -18,7 +20,7 @@ def matploblib_config():
     matplotlib.rcParams["font.family"] = "CMU Serif"
 
     axes = {
-        "labelsize": 22,
+        "labelsize": 28,
         "titlesize": 18,
         "titleweight": "bold",
         "labelweight": "bold",
@@ -28,17 +30,19 @@ def matploblib_config():
     lines = {"linewidth": 2}
     matplotlib.rc("lines", **lines)
 
-    legends = {"fontsize": 14}
+    legends = {"fontsize": 20}
     matplotlib.rc("legend", **legends)
 
     savefig = {"dpi": 300}
     matplotlib.rc("savefig", **savefig)
 
-    # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-    #     color=["r", "b", "g", "m", "k"]
-    # )
-    matplotlib.rcParams["ytick.labelsize"] = 15
-    matplotlib.rcParams["xtick.labelsize"] = 15
+    matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+        color=["8fbed9", "004c6d"]
+    )
+    matplotlib.rcParams["ytick.labelsize"] = 20
+    matplotlib.rcParams["xtick.labelsize"] = 20
+
+    matplotlib.rcParams["axes.grid"] = True
 
 
 def exd_graph():
@@ -80,7 +84,7 @@ def exd_graph():
     #     "aquecedor": 38.2098032
     # }
 
-    labels = ("Compressor", "Regenerator", "Comb. Chamber", "Turbine", "Absorber", "Generator", "Condenser",
+    labels = ("Compressor", "Regenerator", "CC", "Turbine", "Absorber", "Generator", "Condenser",
               "Evaporator", "SV", "RV", "SHX", "Pump", "Humidifier", "Dehumidifier", "Heater")
     exd_total = {}
     for exd, label in zip(exd_k_libr.values(), labels):
@@ -88,29 +92,31 @@ def exd_graph():
 
     exd_sorted = dict(sorted(exd_total.items(), key=lambda x: x[1]))
 
-    width = 0.35
+    width = 0.45
     labels_sorted = list(exd_sorted.keys())
     libr_sorted = [exd for exd in exd_sorted.values()]
 
     y_pos = np.arange(len(labels_sorted))
 
-    fig, ax = plt.subplots(figsize=(14, 8))
+    fig, ax = plt.subplots(figsize=(13, 8))
     bars = ax.barh(y_pos, libr_sorted, width, color="#306bac")
     # bars = ax.barh(y_pos, libr_sorted, color="#306bac")
     # rects1 = ax.barh(y_pos - width / 2, libr_sorted, width, label=r'$LiBr/H_2O$')
     # rects2 = ax.barh(y_pos + width / 2, nh3_sorted, width, label=r'$NH_3/H_2O$')
-    for bars in ax.containers:
-        ax.bar_label(bars, fmt="%.3f", padding=3)
-
+    # for bars in ax.containers:
+    ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=19)
+    ax.set_xlim(None, 180)
     # values = [exd for exd in exd_k_libr.values()]
     # y_pos = np.arange(len(label))
 
     # ax.barh(y_pos, values, align='center')
     ax.set_yticks(y_pos, labels=labels_sorted)
     ax.set_xlabel(r'$\dot{Ex}_{d,k}$ (kW)')
-    ax.set_title('Exergy destruction at kth equipment')
+    # ax.set_title('Exergy destruction at kth equipment')
     ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.8))
-    axins = inset_axes(ax, width=6.4, height=4, loc=4, borderpad=2)
+    axins = inset_axes(ax, width=6.8, height=4, loc=4, borderpad=2)
+    axins.set_xlim(None, 10)
+    axins.set_title("Zoom in")
     # axins.tick_params(labelleft=False, labelbottom=False)
 
     zoomed_data = dict(itertools.islice(exd_sorted.items(), 9))
@@ -124,16 +130,15 @@ def exd_graph():
     # z_rects1 = axins.barh(z_y_pos - width / 2, z_libr_sorted, width, label=r'$LiBr/H_2O$')
     # z_rects2 = axins.barh(z_y_pos + width / 2, z_nh3_sorted, width, label=r'$NH_3/H_2O$')
     for bars in axins.containers:
-        axins.bar_label(bars, fmt="%.3f", padding=3)
+        axins.bar_label(bars, fmt="%.2f", padding=3, fontsize=19)
     axins.set_yticks(z_y_pos, labels=z_labels_sorted)
     ax.grid(False)
     axins.grid(False)
-    path = r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\05 - Imagens e diagramas\resultados"
-    # filename = "exd_equipamentos_enus.pdf"
+    path = "models/graphs"
     filename = "exd_equipamentos_enus.jpg"
     filepath = os.path.join(path, filename)
+    plt.tight_layout()
     plt.savefig(filepath)
-    # plt.show()
 
 
 def psi_graph():
@@ -220,4 +225,4 @@ def psi_graph():
 if __name__ == "__main__":
     matploblib_config()
     exd_graph()
-    psi_graph()
+    # psi_graph()

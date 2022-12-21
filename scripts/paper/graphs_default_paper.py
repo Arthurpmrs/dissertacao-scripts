@@ -34,7 +34,7 @@ class GraphsPaper:
         return plots_folder
 
     def set_matplotlib_globalconfig(self):
-        plt.style.use("ggplot")
+        plt.style.use("seaborn-paper")
 
         font_dir = [r"C:\Root\Download\computer-modern"]
         for font in font_manager.findSystemFonts(font_dir):
@@ -44,7 +44,7 @@ class GraphsPaper:
         matplotlib.rcParams["font.family"] = "CMU Serif"
 
         axes = {
-            "labelsize": 18,
+            "labelsize": 24,
             "titlesize": 16,
             "titleweight": "bold",
             "labelweight": "bold",
@@ -54,7 +54,7 @@ class GraphsPaper:
         lines = {"linewidth": 2}
         matplotlib.rc("lines", **lines)
 
-        legends = {"fontsize": 13}
+        legends = {"fontsize": 20}
         matplotlib.rc("legend", **legends)
 
         savefig = {"dpi": 300}
@@ -63,8 +63,8 @@ class GraphsPaper:
         # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
         #     color=["r", "b", "g", "m", "k"]
         # )
-        matplotlib.rcParams["ytick.labelsize"] = 13
-        matplotlib.rcParams["xtick.labelsize"] = 13
+        matplotlib.rcParams["ytick.labelsize"] = 20
+        matplotlib.rcParams["xtick.labelsize"] = 20
         matplotlib.rcParams["axes.grid"] = False
         # matplotlib.rcParams["axes.edgecolor"] = "grey"
 

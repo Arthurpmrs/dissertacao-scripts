@@ -1,10 +1,12 @@
 import os
+import sys
+import itertools
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-import numpy as np
-import itertools
+sys.path.append(os.path.join(os.getcwd(), 'scripts'))
 
 
 def matploblib_config():
@@ -18,8 +20,8 @@ def matploblib_config():
     matplotlib.rcParams["font.family"] = "CMU Serif"
 
     axes = {
-        "labelsize": 28,
-        "titlesize": 18,
+        "labelsize": 32,
+        "titlesize": 28,
         "titleweight": "bold",
         "labelweight": "bold",
     }
@@ -28,7 +30,7 @@ def matploblib_config():
     lines = {"linewidth": 2}
     matplotlib.rc("lines", **lines)
 
-    legends = {"fontsize": 20}
+    legends = {"fontsize": 22}
     matplotlib.rc("legend", **legends)
 
     savefig = {"dpi": 300}
@@ -37,8 +39,8 @@ def matploblib_config():
     matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
         color=["8fbed9", "004c6d"]
     )
-    matplotlib.rcParams["ytick.labelsize"] = 20
-    matplotlib.rcParams["xtick.labelsize"] = 20
+    matplotlib.rcParams["ytick.labelsize"] = 28
+    matplotlib.rcParams["xtick.labelsize"] = 28
 
     matplotlib.rcParams["axes.grid"] = True
 
@@ -93,20 +95,21 @@ def exd_graph():
 
     exd_sorted = dict(sorted(exd_total.items(), key=lambda x: x[1][0]))
 
-    width = 0.30
-    dist = 0.22
+    width = 0.20
+    dist = 0.25
     labels_sorted = list(exd_sorted.keys())
     libr_sorted = [exd[0] for exd in exd_sorted.values()]
     nh3_sorted = [exd[1] for exd in exd_sorted.values()]
 
     y_pos = np.arange(len(labels_sorted))
 
-    fig, ax = plt.subplots(figsize=(17, 10))
+    fig, ax = plt.subplots(figsize=(19, 14))
     rects1 = ax.barh(y_pos - dist, libr_sorted, width, label=r'$LiBr/H_2O$')
     rects2 = ax.barh(y_pos + dist, nh3_sorted, width, label=r'$NH_3/H_2O$')
     for bars in ax.containers:
-        ax.bar_label(bars, fmt="%.1f", padding=2, fontsize=16)
+        ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=28)
 
+    ax.set_xlim(None, 180)
     # values = [exd for exd in exd_k_libr.values()]
     # y_pos = np.arange(len(label))
 
@@ -115,7 +118,9 @@ def exd_graph():
     ax.set_xlabel(r'$\dot{Ex}_{d,k}$ (kW)')
     # ax.set_title('Destruição de exergia nos equipamentos do sistema')
     ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.8))
-    axins = inset_axes(ax, width=6.4, height=4, loc=4, borderpad=2)
+    axins = inset_axes(ax, width=8.8, height=6, loc=4, borderpad=2)
+    axins.set_xlim(None, 3)
+    axins.set_title("Zoom")
     # axins.tick_params(labelleft=False, labelbottom=False)
 
     zoomed_data = dict(itertools.islice(exd_sorted.items(), 9))
@@ -127,14 +132,14 @@ def exd_graph():
     z_rects1 = axins.barh(z_y_pos - dist, z_libr_sorted, width, label=r'$LiBr/H_2O$')
     z_rects2 = axins.barh(z_y_pos + dist, z_nh3_sorted, width, label=r'$NH_3/H_2O$')
     for bars in axins.containers:
-        axins.bar_label(bars, fmt="%.2f", padding=4, fontsize=16)
+        axins.bar_label(bars, fmt="%.2f", padding=3, fontsize=28)
     axins.set_yticks(z_y_pos, labels=z_labels_sorted)
     ax.grid(False)
     axins.grid(False)
-    path = r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\05 - Imagens e diagramas\resultados"
+    path = "models/graphs"
     filename = "exd_equipamentos_ptbr.pdf"
     filepath = os.path.join(path, filename)
-    plt.savefig(filepath)
+    plt.savefig(filepath, bbox_inches="tight")
 
 
 def psi_graph():
@@ -187,20 +192,20 @@ def psi_graph():
 
     psi_sorted = dict(sorted(psi_total.items(), key=lambda x: x[1][1]))
 
-    width = 0.30
-    dist = 0.22
+    width = 0.20
+    dist = 0.25
     labels_sorted = list(psi_sorted.keys())
     libr_sorted = [psi[0] for psi in psi_sorted.values()]
     nh3_sorted = [psi[1] for psi in psi_sorted.values()]
 
     y_pos = np.arange(len(labels_sorted))
 
-    fig, ax = plt.subplots(figsize=(17, 10))
+    fig, ax = plt.subplots(figsize=(19, 14))
     rects1 = ax.barh(y_pos - dist, libr_sorted, width, label=r'$LiBr/H_2O$')
     rects2 = ax.barh(y_pos + dist, nh3_sorted, width, label=r'$NH_3/H_2O$')
     for bars in ax.containers:
-        ax.bar_label(bars, fmt="%.2f", padding=4, fontsize=16)
-
+        ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=28)
+    ax.set_xlim(None, 110)
     # values = [psi for psi in psi_k_libr.values()]
     # y_pos = np.arange(len(label))
 
@@ -211,10 +216,10 @@ def psi_graph():
     ax.legend()
 
     ax.grid(False)
-    path = r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\05 - Imagens e diagramas\resultados"
+    path = "models/graphs"
     filename = "psi_equipamentos_ptbr.pdf"
     filepath = os.path.join(path, filename)
-    plt.savefig(filepath)
+    plt.savefig(filepath, bbox_inches="tight")
 
 
 if __name__ == "__main__":
