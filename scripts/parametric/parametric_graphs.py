@@ -1,33 +1,33 @@
 import os
 import sys
-# sys.path.append(os.path.join(os.getcwd(), 'src'))
 sys.path.append(os.getcwd())
-from ees.parametric_graphs import Graphs
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
-from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 
 
-class DefaultGraphsCombined:
+class DefaultGraphs:
 
-    def __init__(self, base_path, variable, run_id):
+    def __init__(self, model_path, variable, run_id):
         self.variable = variable
         self.run_id = run_id
-        self.base_path = base_path
+        self.base_path = os.path.dirname(model_path)
+        self.model_name = ".".join(os.path.basename(model_path).split(".")[:-1])
         self.df = self.get_df()
         self.plots_folder = self.set_plots_folder()
         self.set_matplotlib_globalconfig()
 
     def get_df(self):
         filepath = os.path.join(
-            self.base_path, ".ParamAnalysis", self.run_id, ".results", self.variable, "parametric_result.csv"
+            self.base_path, "results", self.model_name, ".ParamAnalysis",
+            self.run_id, ".results", self.variable, "parametric_result.csv"
         )
         return pd.read_csv(filepath, sep=";")
 
     def set_plots_folder(self):
-        plots_folder = os.path.join(self.base_path, ".ParamAnalysis", self.run_id, ".plots", "combined")
+        plots_folder = os.path.join(self.base_path, "results", self.model_name,
+                                    ".ParamAnalysis", self.run_id, ".plots", self.variable)
 
         if not os.path.exists(plots_folder):
             os.makedirs(plots_folder)
@@ -37,7 +37,7 @@ class DefaultGraphsCombined:
     def set_matplotlib_globalconfig(self):
         plt.style.use("seaborn-paper")
 
-        font_dir = [r"C:\Root\Download\computer-modern"]
+        font_dir = [r"font\computer-modern"]
         for font in font_manager.findSystemFonts(font_dir):
             font_manager.fontManager.addfont(font)
 
@@ -61,13 +61,9 @@ class DefaultGraphsCombined:
         savefig = {"dpi": 300}
         matplotlib.rc("savefig", **savefig)
 
-        # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-        #     color=["r", "b", "g", "m", "k"]
-        # )
         matplotlib.rcParams["ytick.labelsize"] = 20
         matplotlib.rcParams["xtick.labelsize"] = 20
         matplotlib.rcParams["axes.grid"] = False
-        # matplotlib.rcParams["axes.edgecolor"] = "grey"
 
     def get_plotable_data(self, partial):
         euf = {"data": self.df["EUF_sys"], "legend": r"$EUF$", "label": r"$EUF$"}
@@ -162,11 +158,11 @@ class DefaultGraphsCombined:
         del fig
 
 
-class HDHEffGraphsCombined:
+class HDHEffGraphs:
 
-    def __init__(self, base_path, run_id):
+    def __init__(self, model_paths, run_id):
         self.run_id = run_id
-        self.base_path = base_path
+        self.model_paths = model_paths
         self.dfs = self.get_df()
         self.plots_folder = self.set_plots_folder()
         self.set_matplotlib_globalconfig()
@@ -174,21 +170,26 @@ class HDHEffGraphsCombined:
     def get_df(self):
         dfs = {}
         e_u_values = [0.5, 0.6, 0.7, 0.8, 0.9]
-        folder_names = [f"hdh_eff_e_u_{e_u}" for e_u in e_u_values]
-        for path in self.base_path:
-            results_path = os.path.join(path, ".results", "epsilon_d")
+        folder_names = [f"hdh_e_u_{e_u}" for e_u in e_u_values]
+        for model_path in self.model_paths:
+            base_path = os.path.dirname(model_path)
+            model_name = ".".join(os.path.basename(model_path).split(".")[:-1])
+            # results_path = os.path.join(base_path, ".results", "epsilon_d")
             results = {}
 
             for i, folder_name in enumerate(folder_names):
-                data_filepath = os.path.join(path, ".ParamAnalysis", folder_name, ".results", "epsilon_d", "parametric_result.csv")
+                data_filepath = os.path.join(base_path, "results", model_name,
+                                             ".ParamAnalysis", folder_name, ".results",
+                                             "epsilon_d", "parametric_result.csv")
                 if os.path.isfile(data_filepath):
                     results.update({e_u_values[i]: pd.read_csv(data_filepath, sep=";")})
 
-            dfs.update({os.path.basename(path): results})
+            dfs.update({model_name: results})
         return dfs
 
     def set_plots_folder(self):
-        plots_folder = os.path.join(os.path.dirname(self.base_path[0]), "both", self.run_id)
+        base_path = os.path.dirname(self.model_paths[0])
+        plots_folder = os.path.join(base_path, "results", "combined_graph")
         if not os.path.exists(plots_folder):
             os.makedirs(plots_folder)
 
@@ -197,7 +198,7 @@ class HDHEffGraphsCombined:
     def set_matplotlib_globalconfig(self):
         plt.style.use("seaborn-paper")
 
-        font_dir = [r"C:\Root\Download\computer-modern"]
+        font_dir = [r"font/computer-modern"]
         for font in font_manager.findSystemFonts(font_dir):
             font_manager.fontManager.addfont(font)
 
@@ -221,12 +222,8 @@ class HDHEffGraphsCombined:
         savefig = {"dpi": 300}
         matplotlib.rc("savefig", **savefig)
 
-        # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-        #     color=["r", "b", "g", "m", "k"]
-        # )
         matplotlib.rcParams["ytick.labelsize"] = 26
         matplotlib.rcParams["xtick.labelsize"] = 26
-        # matplotlib.rcParams["axes.edgecolor"] = "grey"
         matplotlib.rcParams["axes.grid"] = True
 
     def get_plotable_data(self, partial):
@@ -314,54 +311,50 @@ class HDHEffGraphsCombined:
 
 def main():
     model_paths = [
-        r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\01 - Algoritmo\Analise\trigeracao_LiBrH2O",
-        r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\01 - Algoritmo\Analise\trigeracao_NH3H2O"
+        r"C:\Root\Universidade\Mestrado\dissertacao-scripts\models\trigeracao_LiBrH2O.EES",
+        r"C:\Root\Universidade\Mestrado\dissertacao-scripts\models\trigeracao_NH3H2O.EES"
     ]
+    variable_legend_locs = [
+        ["upper center", "best", "best", "best", "best", "best", "best", "lower right", "lower center"],
+        ["upper center", "best", "center left", "center right", "best", "best", "best", "lower right", "lower center"]
+    ]
+    run_id = "param_analysis_v1"
 
-    run_id = "exergy_correction"
-    # variable_legend_locs = [
-    #     ["upper center", "best", "best", "best", "best", "best", "best", "lower right", "lower center"],
-    #     ["upper center", "best", "center left", "center right", "best", "best", "best", "lower right", "lower center"]
-    # ]
-    # for model_path, locs in zip(model_paths, variable_legend_locs):
-    #     graph = DefaultGraphsCombined(model_path, "X_biogas_ch4", run_id)
-    #     graph.base_plot(r'$ x_{CH_4} $', partial=False, loc=locs[0])
-    #     del graph
+    for model_path, locs in zip(model_paths, variable_legend_locs):
+        graph = DefaultGraphs(model_path, "X_biogas_ch4", run_id)
+        graph.base_plot(r'$ x_{CH_4} $', partial=False, loc=locs[0])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, "m_dot[9]", run_id)
-    #     graph.base_plot(r'$ \dot{m}_{9} $ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)', partial=False, loc=locs[1])
-    #     del graph
+        graph = DefaultGraphs(model_path, "m_dot[9]", run_id)
+        graph.base_plot(r'$ \dot{m}_{9} $ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)', partial=False, loc=locs[1])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'T[10]', run_id)
-    #     graph.base_plot(r'$ T_{10} $ ($^{\circ}$C)', loc=locs[2])
-    #     del graph
+        graph = DefaultGraphs(model_path, 'T[10]', run_id)
+        graph.base_plot(r'$ T_{10} $ ($^{\circ}$C)', loc=locs[2])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'T[13]', run_id)
-    #     graph.base_plot(r'$ T_{13} $ ($^{\circ}$C)', loc=locs[3])
-    #     del graph
+        graph = DefaultGraphs(model_path, 'T[13]', run_id)
+        graph.base_plot(r'$ T_{13} $ ($^{\circ}$C)', loc=locs[3])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'T[19]', run_id)
-    #     graph.base_plot(r'$ T_{19} $ ($^{\circ}$C)', loc=locs[4])
-    #     del graph
+        graph = DefaultGraphs(model_path, 'T[19]', run_id)
+        graph.base_plot(r'$ T_{19} $ ($^{\circ}$C)', loc=locs[4])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'T[22]', run_id)
-    #     graph.base_plot(r'$ T_{22} $ ($^{\circ}$C)', loc=locs[5])
-    #     del graph
+        graph = DefaultGraphs(model_path, 'T[22]', run_id)
+        graph.base_plot(r'$ T_{22} $ ($^{\circ}$C)', loc=locs[5])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'epsilon_hx', run_id)
-    #     graph.base_plot(r'$ \varepsilon_{shx} $', loc=locs[6])
-    #     del graph
+        graph = DefaultGraphs(model_path, "MR", run_id)
+        graph.base_plot("MR", loc=locs[7])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, "MR", run_id)
-    #     graph.base_plot("MR", loc=locs[7])
-    #     del graph
+        graph = DefaultGraphs(model_path, 'T[34]', run_id)
+        graph.df.drop(index=6, inplace=True)
+        graph.base_plot(r'$ T_{34} $ ($^{\circ}$C)', loc=locs[8])
+        del graph
 
-    #     graph = DefaultGraphsCombined(model_path, 'T[34]', run_id)
-    #     graph.df.drop(index=6, inplace=True)
-    #     graph.base_plot(r'$ T_{34} $ ($^{\circ}$C)', loc=locs[8])
-    #     del graph
-
-    graph = HDHEffGraphsCombined(model_paths, run_id)
+    graph = HDHEffGraphs(model_paths, run_id)
     graph.base_plot()
     del graph
 

@@ -173,6 +173,7 @@ class ParametricStudies:
         model_filename = os.path.basename(EES_model)
         base_folder = os.path.join(
             model_folder,
+            "results",
             '.'.join(model_filename.split('.')[:-1]),
             '.ParamAnalysis'
         )
@@ -186,15 +187,30 @@ class ParametricStudies:
     def execute(self):
         """Executes the macro file on EES via subprocess module. Returns DataFrame with results."""
 
+        print("--------> Análise paramétrica")
+        print(f"Modelo: {os.path.basename(self.EES_model)}")
+        print(f"Variável analisada:")
+        for variable, values in self.parametric_inputs.items():
+            print(f"    {variable}: de {values[0]} a {values[-1]}")
+
         # Initialize instances of ParametricStudy class and update macro string
+        print("Preparando arquivos auxiliares...")
         self.initialize()
 
         # Creates macro file (.emf)
         macro_filepath = self.setup_macro()
 
+        print("""OBS: Caso o programa esteja sendo executado por muito tempo, é possível que um
+     erro tenha ocorrido. Checar o arquivo macro.log para mais detalhes.
+     Também é necessário fechar o EES que continua a rodar em segundo plano.""")
+        print(" ")
+
         # Run EES and execute macro file
+        print("Executando comandos no EES...")
         subprocess.run([self.EES_exe, macro_filepath, '/hide', '/NOSPLASH'])
 
+        print("Processo Finalizado.")
+        print(" ")
         return self.get_output()
 
     def initialize(self):

@@ -325,7 +325,7 @@ class GAOptimizationStudy(OptimizationStudy):
                 del creator.FitnessMax
         except Exception as e:
             self.logger.exception(e)
-            self.log(">> Erro: Algo de errado ocorreu. Está run está comprometida.")
+            self.log(">> Erro: Algo de errado ocorreu. Esta execução está comprometida.")
             self.log(traceback.format_exc())
         finally:
             self.close()

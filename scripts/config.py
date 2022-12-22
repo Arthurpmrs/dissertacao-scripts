@@ -1,6 +1,3 @@
-# Path to custom font used
-font_location = r"C:\Root\Download\computer-modern"
-
 # Path to output folders
 default_output_folder = r"models"
 
