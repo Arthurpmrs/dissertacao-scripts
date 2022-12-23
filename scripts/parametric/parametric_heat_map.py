@@ -1,15 +1,31 @@
 import os
+import sys
 import numpy as np
 import matplotlib
 import matplotlib as mpl
 import matplotlib.font_manager as font_manager
 import matplotlib.pyplot as plt
+sys.path.append(os.path.join(os.getcwd()))
+from scripts.config import default_output_folder
+
+
+def destination_folder():
+    """Configurar a pasta de destino dos gráficos."""
+
+    folder = os.path.join(default_output_folder, "graphs")
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    return folder
 
 
 def set_matplotlib_globalconfig():
+    """Configurar matplotlib."""
+
     plt.style.use("seaborn-paper")
 
-    font_dir = [r"C:\Root\Download\computer-modern"]
+    font_dir = [r"font\computer-modern"]
     for font in font_manager.findSystemFonts(font_dir):
         font_manager.fontManager.addfont(font)
 
@@ -36,16 +52,14 @@ def set_matplotlib_globalconfig():
     font = {"size": 20, "weight": "bold"}
     matplotlib.rc("font", **font)
 
-    # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-    #     color=["r", "b", "g", "m", "k"]
-    # )
     matplotlib.rcParams["ytick.labelsize"] = 20
     matplotlib.rcParams["xtick.labelsize"] = 20
     matplotlib.rcParams["axes.grid"] = False
-    # matplotlib.rcParams["axes.edgecolor"] = "grey"
 
 
-def main():
+def generate_heatmap():
+    """Gerar heatmap de resumo da análise paramétrica."""
+
     set_matplotlib_globalconfig()
     variables = [r"$\dot{m}_{9}$", r"$X_{CH_4}$", r"$T_{10}$", r"$T_{13}$",
                  r"$T_{19}$", r"$T_{22}$", "MR", r"$T_{34}$",
@@ -66,9 +80,6 @@ def main():
     fig, ax = plt.subplots(figsize=(13, 7))
     im = ax.imshow(percents, cmap="coolwarm", vmin=-40, vmax=100, aspect=0.35)
 
-    # cbar = ax.figure.colorbar(im, ax=ax)
-    # cbar.ax.set_ylabel("%", rotation=-90, va="bottom")
-
     # Show all ticks and label them with the respective list entries
     ax.set_xticks(np.arange(len(parameters)), labels=parameters)
     ax.set_yticks(np.arange(len(variables)), labels=variables)
@@ -85,10 +96,8 @@ def main():
 
     fig.tight_layout()
     plt.tight_layout(w_pad=0.5)
-    plots_folder = r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\05 - Imagens e diagramas"
-    plt.savefig(os.path.join(plots_folder, f"ap-heat-map-libr.pdf"), bbox_inches='tight')
-    plt.show()
+    plt.savefig(os.path.join(destination_folder(), f"parametric-heat-map-libr.pdf"), bbox_inches='tight')
 
 
 if __name__ == "__main__":
-    main()
+    generate_heatmap()

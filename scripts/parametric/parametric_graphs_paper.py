@@ -1,7 +1,6 @@
 import os
 import sys
 sys.path.append(os.path.join(os.getcwd(), 'src'))
-from ees.parametric_graphs import Graphs
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -11,22 +10,25 @@ from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 
 class GraphsPaper:
 
-    def __init__(self, base_path, variable, run_id):
+    def __init__(self, model_path, variable, run_id):
         self.variable = variable
         self.run_id = run_id
-        self.base_path = base_path
+        self.base_path = os.path.dirname(model_path)
+        self.model_name = ".".join(os.path.basename(model_path).split(".")[:-1])
         self.df = self.get_df()
         self.plots_folder = self.set_plots_folder()
         self.set_matplotlib_globalconfig()
 
     def get_df(self):
         filepath = os.path.join(
-            self.base_path, ".ParamAnalysis", self.run_id, ".results", self.variable, "parametric_result.csv"
+            self.base_path, "results", self.model_name, ".ParamAnalysis",
+            self.run_id, ".results", self.variable, "parametric_result.csv"
         )
         return pd.read_csv(filepath, sep=";")
 
     def set_plots_folder(self):
-        plots_folder = os.path.join(self.base_path, ".ParamAnalysis", self.run_id, ".plots", "paper")
+        plots_folder = os.path.join(self.base_path, "results", self.model_name,
+                                    ".ParamAnalysis", self.run_id, ".plots", "paper")
 
         if not os.path.exists(plots_folder):
             os.makedirs(plots_folder)
@@ -36,7 +38,7 @@ class GraphsPaper:
     def set_matplotlib_globalconfig(self):
         plt.style.use("seaborn-paper")
 
-        font_dir = [r"C:\Root\Download\computer-modern"]
+        font_dir = [r"font\computer-modern"]
         for font in font_manager.findSystemFonts(font_dir):
             font_manager.fontManager.addfont(font)
 
@@ -60,15 +62,13 @@ class GraphsPaper:
         savefig = {"dpi": 300}
         matplotlib.rc("savefig", **savefig)
 
-        # matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-        #     color=["r", "b", "g", "m", "k"]
-        # )
         matplotlib.rcParams["ytick.labelsize"] = 20
         matplotlib.rcParams["xtick.labelsize"] = 20
         matplotlib.rcParams["axes.grid"] = False
-        # matplotlib.rcParams["axes.edgecolor"] = "grey"
 
-    def base_plot(self, var_display_str):
+    def generate_plot(self, var_display_str):
+        """Gerar plots da análise paramétrica para o artigo."""
+
         fig, ax = plt.subplots(figsize=(13, 7))
         fig.subplots_adjust(right=0.75, left=0.25)
 
@@ -87,19 +87,11 @@ class GraphsPaper:
         twin2.spines.right.set_position(("axes", 1.2))
         twin3.spines.left.set_position(("axes", -0.2))
 
-        # colors = ["#004c6d", "#0057a3", "#005bd7", "#0051ff"]
-        # colors = ["#003f5c", "#7a5195", "#ef5675", "#ffa600"]
-        # colors = ["#004c6d", "#34546a", "#4e5b67", "#636363"]
-        # colors = ["#004c6d", "#4c3f81", "#93065b", "#a10000"]
-        # colors = ["#004c6d", "#718799", "#c17360", "#a10000"]
         colors = ["#0085cc", "#008702", "#d45800", "#8d00b0"]
         lss = ["solid", "dotted", "dashed", "dashdot"]
-        # colors = ["b", "r", "g", "m"]
         self.df["psi_partial"] = self.df["psi_partial"].apply(lambda x: 100 * x)
         p1, = ax.plot(self.df[self.variable], self.df["EUF_sys"], colors[0], label=r"$EUF$", ls=lss[0])
-        # p2, = twin1.plot(self.df[self.variable], self.df["Exd_partial"], colors[2], label=r"$\dot{Ex}_{d,p}$", ls=lss[1])
         p2, = twin1.plot(self.df[self.variable], self.df["Exd_sys"], colors[2], label=r"$\dot{Ex}_{d,sys}$", ls=lss[1])
-        # p3, = twin2.plot(self.df[self.variable], self.df["psi_partial"], colors[3], label=r"$\psi_{p}$", ls=lss[2])
         p3, = twin2.plot(self.df[self.variable], self.df["psi_sys_1"], colors[3], label=r"$\psi_{sys}$", ls=lss[2])
         p4, = twin3.plot(self.df[self.variable], self.df["m_dot[38]"], colors[1], label=r"$\dot{m}_{38}$", ls=lss[3])
 
@@ -149,39 +141,30 @@ class GraphsPaper:
 
 
 def main():
-    base_path = r"C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\01 - Algoritmo\Analise\trigeracao_LiBrH2O"
-    run_id = "exergy_correction"
-    # graph = GraphsPaper(base_path, 'T[22]', run_id)
-    # graph.base_plot(r'$ T_{22} $ ($^{\circ}$C)')
+    model_path = r"C:\Root\Universidade\Mestrado\dissertacao-scripts\models\trigeracao_LiBrH2O.EES"
+    run_id = "param_analysis_v1"
 
-    # graph = GraphsPaper(base_path, 'T[19]', run_id)
-    # graph.base_plot(r'$ T_{19} $ ($^{\circ}$C)')
+    graph = GraphsPaper(model_path, "X_biogas_ch4", run_id)
+    graph.generate_plot(r'$ x_{CH_4} $')
 
-    # graph = GraphsPaper(base_path, 'T[10]', run_id)
-    # graph.base_plot(r'$ T_{10} $ ($^{\circ}$C)')
+    graph = GraphsPaper(model_path, 'T[22]', run_id)
+    graph.generate_plot(r'$ T_{22} $ ($^{\circ}$C)')
 
-    # graph = GraphsPaper(base_path, 'T[13]', run_id)
-    # graph.base_plot(r'$ T_{13} $ ($^{\circ}$C)')
+    graph = GraphsPaper(model_path, 'T[19]', run_id)
+    graph.generate_plot(r'$ T_{19} $ ($^{\circ}$C)')
 
-    # graph = GraphsPaper(base_path, 'epsilon_hx', run_id)
-    # graph.base_plot(r'$ \varepsilon_{SHX} $')
+    graph = GraphsPaper(model_path, 'T[10]', run_id)
+    graph.generate_plot(r'$ T_{10} $ ($^{\circ}$C)')
 
-    # graph = GraphsPaper(base_path, "MR", run_id)
-    # graph.base_plot("MR")
+    graph = GraphsPaper(model_path, 'T[13]', run_id)
+    graph.generate_plot(r'$ T_{13} $ ($^{\circ}$C)')
 
-    # graph = GraphsPaper(base_path, 'T[34]', run_id)
-    # graph.df.drop(index=6, inplace=True)
-    # graph.base_plot(r'$ T_{34} $ ($^{\circ}$C)')
+    graph = GraphsPaper(model_path, "MR", run_id)
+    graph.generate_plot("MR")
 
-    graph = GraphsPaper(base_path, "X_biogas_ch4", run_id)
-    graph.base_plot(r'$ x_{CH_4} $')
-
-    # graph = GraphsPaper(base_path, 'epsilon_d', run_id)
-    # graph.base_plot(r'$ \varepsilon_{d} $')
-
-    # graph = GraphsPaper(base_path, 'epsilon_u', run_id)
-    # graph.df = graph.df.drop(index=2)
-    # graph.base_plot(r'$ \varepsilon_{h} $')
+    graph = GraphsPaper(model_path, 'T[34]', run_id)
+    graph.df.drop(index=6, inplace=True)
+    graph.generate_plot(r'$ T_{34} $ ($^{\circ}$C)')
 
 
 if __name__ == "__main__":

@@ -6,13 +6,27 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-sys.path.append(os.path.join(os.getcwd(), 'scripts'))
+sys.path.append(os.path.join(os.getcwd()))
+from scripts.config import default_output_folder
+
+
+def destination_folder():
+    """Configurar a pasta de destino dos gráficos."""
+
+    folder = os.path.join(default_output_folder, "graphs", "exergy")
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    return folder
 
 
 def matploblib_config():
+    """Configurar matplotlib."""
+
     plt.style.use("seaborn-paper")
 
-    font_dir = [r"C:\Root\Download\computer-modern"]
+    font_dir = [r"font\computer-modern"]
     for font in font_manager.findSystemFonts(font_dir):
         font_manager.fontManager.addfont(font)
 
@@ -46,6 +60,8 @@ def matploblib_config():
 
 
 def exd_graph():
+    """Gráfico das destruições de exergia dos volumes de controle do sistema."""
+
     exd_k_libr = {
         "compressor": 15.8719014,
         "regenerador": 35.9994965,
@@ -110,18 +126,13 @@ def exd_graph():
         ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=28)
 
     ax.set_xlim(None, 180)
-    # values = [exd for exd in exd_k_libr.values()]
-    # y_pos = np.arange(len(label))
 
-    # ax.barh(y_pos, values, align='center')
     ax.set_yticks(y_pos, labels=labels_sorted)
     ax.set_xlabel(r'$\dot{Ex}_{d,k}$ (kW)')
-    # ax.set_title('Destruição de exergia nos equipamentos do sistema')
     ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.8))
     axins = inset_axes(ax, width=8.8, height=6, loc=4, borderpad=2)
     axins.set_xlim(None, 3)
     axins.set_title("Zoom")
-    # axins.tick_params(labelleft=False, labelbottom=False)
 
     zoomed_data = dict(itertools.islice(exd_sorted.items(), 9))
     z_labels_sorted = list(zoomed_data.keys())
@@ -136,13 +147,13 @@ def exd_graph():
     axins.set_yticks(z_y_pos, labels=z_labels_sorted)
     ax.grid(False)
     axins.grid(False)
-    path = "models/graphs"
-    filename = "exd_equipamentos_ptbr.pdf"
-    filepath = os.path.join(path, filename)
+    filepath = os.path.join(destination_folder(), "exd_equipamentos_ptbr.pdf")
     plt.savefig(filepath, bbox_inches="tight")
 
 
 def psi_graph():
+    """Gráfico das eficiências exergéticas dos volumes de controle do sistema."""
+
     psi_k_libr = {
         "compressor": 89.4834085,
         "regenerador": 81.9937253,
@@ -206,23 +217,86 @@ def psi_graph():
     for bars in ax.containers:
         ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=28)
     ax.set_xlim(None, 110)
-    # values = [psi for psi in psi_k_libr.values()]
-    # y_pos = np.arange(len(label))
 
-    # ax.barh(y_pos, values, align='center')
     ax.set_yticks(y_pos, labels=labels_sorted)
     ax.set_xlabel(r'$\psi_{k}$ (%)')
-    # ax.set_title('Eficiência exergética dos equipamentos do sistema')
     ax.legend()
 
     ax.grid(False)
-    path = "models/graphs"
-    filename = "psi_equipamentos_ptbr.pdf"
-    filepath = os.path.join(path, filename)
+    filepath = os.path.join(destination_folder(), "psi_equipamentos_ptbr.pdf")
     plt.savefig(filepath, bbox_inches="tight")
+
+
+def exd_graph_paper():
+    """Gráfico das destruições de exergia dos volumes de controle do sistema em inglês e só para o sistema LiBr."""
+
+    exd_k_libr = {
+        "compressor": 15.8719014,
+        "regenerador": 35.9994965,
+        "cc": 163.205706,
+        "turbina": 16.4252122,
+        "absorvedor": 0.620634485,
+        "gerador": 4.52427394,
+        "condensador": 0.520269154,
+        "evaporador": 0.364249391,
+        "vs": 0.002141506,
+        "vr": 0.04672878,
+        "hx": 0.154546269,
+        "bomba": 1.30749E-05,
+        "umidificador": 8.41433196,
+        "desumidificador": 10.2478122,
+        "aquecedor": 39.5269246
+    }
+
+    labels = ("Compressor", "Regenerator", "CC", "Turbine", "Absorber", "Generator", "Condenser",
+              "Evaporator", "SV", "RV", "SHX", "Pump", "Humidifier", "Dehumidifier", "Heater")
+
+    exd_total = {}
+    for exd, label in zip(exd_k_libr.values(), labels):
+        exd_total.update({label: exd})
+
+    exd_sorted = dict(sorted(exd_total.items(), key=lambda x: x[1]))
+
+    width = 0.45
+    labels_sorted = list(exd_sorted.keys())
+    libr_sorted = [exd for exd in exd_sorted.values()]
+
+    y_pos = np.arange(len(labels_sorted))
+
+    fig, ax = plt.subplots(figsize=(16, 11))
+    bars = ax.barh(y_pos, libr_sorted, width, color="#306bac")
+    # for bars in ax.containers:
+    ax.bar_label(bars, fmt="%.2f", padding=3, fontsize=19)
+    ax.set_xlim(None, 180)
+
+    ax.set_yticks(y_pos, labels=labels_sorted)
+    ax.set_xlabel(r'$\dot{Ex}_{d,k}$ (kW)')
+    ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.8))
+    axins = inset_axes(ax, width=6.8, height=4, loc=4, borderpad=2)
+    axins.set_xlim(None, 10)
+    axins.set_title("Zoom in")
+
+    zoomed_data = dict(itertools.islice(exd_sorted.items(), 9))
+    z_labels_sorted = list(zoomed_data.keys())
+    z_libr_sorted = [exd for exd in zoomed_data.values()]
+
+    z_y_pos = np.arange(len(z_labels_sorted))
+    z_bars = axins.barh(z_y_pos, z_libr_sorted, width, color="#306bac")
+
+    for bars in axins.containers:
+        axins.bar_label(bars, fmt="%.2f", padding=3, fontsize=19)
+    axins.set_yticks(z_y_pos, labels=z_labels_sorted)
+    ax.grid(False)
+    axins.grid(False)
+
+    filepath = os.path.join(destination_folder(), "exd_equipamentos_enus.jpg")
+    filepath_pdf = os.path.join(destination_folder(), "exd_equipamentos_enus.pdf")
+    plt.savefig(filepath, bbox_inches="tight")
+    plt.savefig(filepath_pdf, bbox_inches="tight")
 
 
 if __name__ == "__main__":
     matploblib_config()
     psi_graph()
     exd_graph()
+    exd_graph_paper()

@@ -2,16 +2,39 @@ import os
 import time
 import sys
 import csv
-sys.path.append(os.path.join(os.getcwd(), 'src'))
+sys.path.append(os.path.join(os.getcwd()))
 import numpy as np
 import pandas as pd
 from ees.solvemodel import SolveModel
 from ees.utilities import cleanup_csv
+from scripts.config import EES_exe
 
 
-def libr():
-    EES_exe = r'C:\Root\Universidade\EES\EES.exe'
-    EES_model = r'C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\01 - Algoritmo\Analise\trigeracao_LiBrH2O.EES'
+def solve(EES_model, inputs, outputs, runID):
+    """Avalia os modelos com base nas variáveis de entrada e salva os resultados especificados."""
+
+    eesmodel = SolveModel(EES_exe, EES_model, inputs, outputs, runID=runID)
+    result = eesmodel.execute()
+    df = pd.DataFrame.from_dict(result, orient='index')
+    print(runID)
+    print(df)
+    print(" ")
+
+    inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
+    inputs_df = pd.DataFrame.from_dict(inputs, orient='index')
+    inputs_df.to_excel(inputs_filename)
+
+    excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
+    df.to_excel(excel_filename)
+
+    csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
+    cleanup_csv(csv_filename)
+
+    time.sleep(5)
+
+
+def LiBr_model():
+    EES_model = r'C:\Root\Universidade\Mestrado\dissertacao-scripts\models\trigeracao_LiBrH2O.EES'
 
     inputs = {
         'm_dot[9]': 0.0226,
@@ -60,8 +83,11 @@ def libr():
                'EUF_sys_turbina', 'EUF_sys_sra', 'EUF_sys_hdh', 'psi_sys_turbina', 'psi_sys_sra', 'psi_sys_hdh',
                'psi_partial', 'Exd_partial']
 
+    # CASO BASE
+    solve(EES_model, inputs, outputs, runID="CASO_BASE")
+
     casos = {
-        "v2-caso1": {
+        "caso1": {
             "T[10]": 35.00605725132968,
             "T[19]": 35.009395493143664,
             "T[13]": 84.65362090803661,
@@ -69,7 +95,7 @@ def libr():
             "MR": 1.9869833698980435,
             "T[34]": 68.11813029159323
         },
-        "v2-caso2": {
+        "caso2": {
             "T[10]": 35.012024779165586,
             "T[19]": 35.10231867169098,
             "T[13]": 85.01460541391867,
@@ -77,7 +103,7 @@ def libr():
             "MR": 4.1054918454862985,
             "T[34]": 99.97410015687473
         },
-        "v2-caso3": {
+        "caso3": {
             "T[10]": 35.03834126958878,
             "T[19]": 35.010537539127725,
             "T[13]": 84.21670997033569,
@@ -91,71 +117,11 @@ def libr():
         modified_input.update(inputs)
         modified_input.update(case_vars)
 
-        eesmodel = SolveModel(EES_exe, EES_model, modified_input, outputs, runID=caso)
-        result = eesmodel.execute()
-        df = pd.DataFrame.from_dict(result, orient='index')
-        print(caso)
-        print(df)
-        print(" ")
-
-        inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-        inputs_df = pd.DataFrame.from_dict(modified_input, orient='index')
-        inputs_df.to_excel(inputs_filename)
-
-        excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-        df.to_excel(excel_filename)
-
-        csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-        cleanup_csv(csv_filename)
-
-        time.sleep(5)
-
-    # CASO BASE
-    eesmodel = SolveModel(EES_exe, EES_model, inputs, outputs, runID="v2-CASO BASE")
-    result = eesmodel.execute()
-    df = pd.DataFrame.from_dict(result, orient='index')
-    print(df)
-
-    inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-    inputs_df = pd.DataFrame.from_dict(inputs, orient='index')
-    inputs_df.to_excel(inputs_filename)
-
-    excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-    df.to_excel(excel_filename)
-
-    csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-    cleanup_csv(csv_filename)
-
-    # CASO LIMITE
-    # inputs.update(
-    #     {
-    #         "T[10]": 35,
-    #         "T[19]": 35,
-    #         "T[13]": 90,
-    #         "T[22]": 6,
-    #         "MR": 2.6,
-    #         "T[34]": 68
-    #     }
-    # )
-    # eesmodel = SolveModel(EES_exe, EES_model, inputs, outputs, runID="Caso Limite")
-    # result = eesmodel.execute()
-    # df = pd.DataFrame.from_dict(result, orient='index')
-    # print(df)
-
-    # inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-    # inputs_df = pd.DataFrame.from_dict(inputs, orient='index')
-    # inputs_df.to_excel(inputs_filename)
-
-    # excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-    # df.to_excel(excel_filename)
-
-    # csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-    # cleanup_csv(csv_filename)
+        solve(EES_model, modified_input, outputs, runID=caso)
 
 
-def nh3():
-    EES_exe = r'C:\Root\Universidade\EES\EES.exe'
-    EES_model = r'C:\Root\Drive\Unicamp\[Unicamp]\[Dissertação]\01 - Algoritmo\Analise\trigeracao_NH3H2O.EES'
+def NH3_model():
+    EES_model = r'C:\Root\Universidade\Mestrado\dissertacao-scripts\models\trigeracao_NH3H2O.EES'
 
     inputs = {
         'm_dot[9]': 0.0226,
@@ -206,8 +172,11 @@ def nh3():
                'EUF_sys_turbina', 'EUF_sys_sra', 'EUF_sys_hdh', 'psi_sys_turbina', 'psi_sys_sra', 'psi_sys_hdh', 'Exd_retificador',
                'Exd_rhx', 'epsilon_rhx', 'psi_partial', 'Exd_partial']
 
+    # CASO BASE
+    solve(EES_model, inputs, outputs, runID="CASO_BASE")
+
     casos = {
-        "v2-caso1": {
+        "caso1": {
             "T[10]": 35.00503361381352,
             "T[19]": 35.00197668295226,
             "T[13]": 89.96853978405608,
@@ -215,7 +184,7 @@ def nh3():
             "MR": 1.9838458708739872,
             "T[34]": 68.02894290613834
         },
-        "v2-caso2": {
+        "caso2": {
             "T[10]": 35.00292710645969,
             "T[19]": 35.00261818757181,
             "T[13]": 89.97643507841696,
@@ -223,7 +192,7 @@ def nh3():
             "MR": 4.087498338770087,
             "T[34]": 99.9742934894558
         },
-        "v2-caso3": {
+        "caso3": {
             "T[10]": 35.022784168424366,
             "T[19]": 35.00969985720541,
             "T[13]": 89.81685794790505,
@@ -237,69 +206,9 @@ def nh3():
         modified_input.update(inputs)
         modified_input.update(case_vars)
 
-        eesmodel = SolveModel(EES_exe, EES_model, modified_input, outputs, runID=caso)
-        result = eesmodel.execute()
-        df = pd.DataFrame.from_dict(result, orient='index')
-        print(caso)
-        print(df)
-        print(" ")
-
-        inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-        inputs_df = pd.DataFrame.from_dict(modified_input, orient='index')
-        inputs_df.to_excel(inputs_filename)
-
-        excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-        df.to_excel(excel_filename)
-
-        csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-        cleanup_csv(csv_filename)
-
-        time.sleep(5)
-
-    # CASO BASE
-
-    eesmodel = SolveModel(EES_exe, EES_model, inputs, outputs, runID="v2-CASO BASE")
-    result = eesmodel.execute()
-    df = pd.DataFrame.from_dict(result, orient='index')
-    print(df)
-
-    inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-    inputs_df = pd.DataFrame.from_dict(inputs, orient='index')
-    inputs_df.to_excel(inputs_filename)
-
-    excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-    df.to_excel(excel_filename)
-
-    csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-    cleanup_csv(csv_filename)
-
-    # CASO LIMITE
-    # inputs.update(
-    #     {
-    #         "T[10]": 35,
-    #         "T[19]": 35,
-    #         "T[13]": 90,
-    #         "T[22]": 6,
-    #         "MR": 2.6,
-    #         "T[34]": 68
-    #     }
-    # )
-    # eesmodel = SolveModel(EES_exe, EES_model, inputs, outputs, runID="Caso Limite")
-    # result = eesmodel.execute()
-    # df = pd.DataFrame.from_dict(result, orient='index')
-    # print(df)
-
-    # inputs_filename = os.path.join(eesmodel.paths["base_folder"], "displayed_inputs.xlsx")
-    # inputs_df = pd.DataFrame.from_dict(inputs, orient='index')
-    # inputs_df.to_excel(inputs_filename)
-
-    # excel_filename = os.path.join(eesmodel.paths["base_folder"], "outputs.xlsx")
-    # df.to_excel(excel_filename)
-
-    # csv_filename = os.path.join(eesmodel.paths["base_folder"], "ARRAYS.csv")
-    # cleanup_csv(csv_filename)
+        solve(EES_model, modified_input, outputs, runID=caso)
 
 
 if __name__ == "__main__":
-    # libr()
-    nh3()
+    LiBr_model()
+    NH3_model()

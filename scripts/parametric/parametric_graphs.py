@@ -96,14 +96,8 @@ class DefaultGraphs:
         twin2.spines.right.set_position(("axes", 1.2))
         twin3.spines.left.set_position(("axes", -0.2))
 
-        # colors = ["#004c6d", "#0057a3", "#005bd7", "#0051ff"]
-        # colors = ["#003f5c", "#7a5195", "#ef5675", "#ffa600"]
-        # colors = ["#004c6d", "#34546a", "#4e5b67", "#636363"]
-        # colors = ["#004c6d", "#4c3f81", "#93065b", "#a10000"]
-        # colors = ["#004c6d", "#718799", "#c17360", "#a10000"]
         colors = ["#0085cc", "#008702", "#d45800", "#8d00b0"]
         lss = ["solid", "dotted", "dashed", "dashdot"]
-        # colors = ["b", "r", "g", "m"]
 
         euf, m38, exd, psi = self.get_plotable_data(partial=partial)
 
@@ -174,7 +168,6 @@ class HDHEffGraphs:
         for model_path in self.model_paths:
             base_path = os.path.dirname(model_path)
             model_name = ".".join(os.path.basename(model_path).split(".")[:-1])
-            # results_path = os.path.join(base_path, ".results", "epsilon_d")
             results = {}
 
             for i, folder_name in enumerate(folder_names):
@@ -242,22 +235,19 @@ class HDHEffGraphs:
         var_display_str = r"$ \varepsilon_{d} $"
 
         fig, ((ax_euf, ax_m38), (ax_exd, ax_psi)) = plt.subplots(2, 2, figsize=(18, 12))
-        # ax_euf.set_title("Fator de utilização de Energia (EUF)")
+
         ax_euf.set_xlabel(var_display_str)
         ax_euf.set_ylabel(r"EUF")
         ax_euf.set_title("a)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        # ax_m38.set_title(r"Vazão de água dessalinizada ($\dot{m}_{38}$)")
         ax_m38.set_xlabel(var_display_str)
         ax_m38.set_ylabel(r"$\dot{m}_{38}$ ($\mathrm{kg} \cdot \mathrm{s}^{-1}$)")
         ax_m38.set_title("b)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        # ax_exd.set_title(r"Taxa de destruição de exergia parcial ($\dot{Ex}_{d,p}$)")
         ax_exd.set_xlabel(var_display_str)
         ax_exd.set_ylabel(r"$\dot{Ex}_{d,p}$ (kW)")
         ax_exd.set_title("c)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
 
-        # ax_psi.set_title(r"Eficiência exergética parcial ($\psi_{p}$)")
         ax_psi.set_xlabel(var_display_str)
         ax_psi.set_ylabel(r"$\psi_{p}$ (%)")
         ax_psi.set_title("d)", fontfamily="serif", loc="left", style="italic", fontweight="normal")
