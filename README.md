@@ -1,7 +1,5 @@
 # Scripts e Modelos da Dissertação de Mestrado
 
----
-
 ## Introdução
 
 Nesse repositório estão presentes todos os scripts, módulos e modelos utilizados na dissertação de mestrado de título **Análise do desempenho termodinâmico de um sistema de trigeração para produção de potência, refrigeração e água dessalinizada**, elaborada por Arthur Pontes de Miranda Ramos Soares e apresentada à Faculdade de Engenharia Química da Universidade Estadual de Campinas (UNICAMP).
@@ -19,7 +17,7 @@ Para modificar ou utilizar o código, basta baixar o repositório no formado .zi
 EES_exe = r"C:\sua\pasta\aqui\EES.exe"
 ```
 
-**OBS:** Em `scripts\config.py` também é possível especificar uma pasta onde alguns resultados de scripts serão levados. No entanto, para a otimização e para a análise paramétrica, os resultados são destinados a uma pasta na mesma pasta em que os modelos do EES estão.
+**OBS:** Em `scripts\config.py` também é possível especificar uma pasta de destino para resultados de alguns scripts. Todavia, para a otimização e para a análise paramétrica, os resultados são destinados à pasta `results`, criada na mesma pasta em que os modelos do EES estão.
 
 **IMPORTANTE**: Ao extrair ou clonar o repositório, execute os scripts da pasta mãe. Caso contrário, as dependências presentes na pasta `ees` não serão encontradas.
 
@@ -29,27 +27,27 @@ Especificação de versões:
 - EES: Profissional V10.561,
 - Python: 3.7.11
 
-Dependências externas
+Dependências externas:
 
 - Numpy: 1.20.3,
 - matplotlib: 3.5.1,
 - Pandas: 1.3.2,
 - DEAP: 1.3.1,
-- Fonte (utilizada na geração dos gráficos): computer modern (Copyright (C) 2003-2009, Andrey V. Panov (panov@canopus.iacp.dvo.ru), with Reserved Font Family Name "Computer Modern Unicode fonts").
+- Fonte _computer modern_ (Copyright (C) 2003-2009, Andrey V. Panov (panov@canopus.iacp.dvo.ru), with Reserved Font Family Name "Computer Modern Unicode fonts").
 
 ## Documentação
 
-O presente repositório está em três partes principais:
+O presente repositório está dividido em três partes principais:
 
-- `ees`: Módulo que contém as definições das classes e funções destinadas a efetuar a avaliação, análise paramétrica e otimização dos modelos do EES utilizando o Python.
+- `ees`: Módulo que contém as definições das classes e funções destinadas a efetuar a avaliação, análise paramétrica e otimização dos modelos do EES, utilizando o Python.
 - `models`: Pasta que contém os modelos do EES referentes à dissertação;
 - `scripts`: Pasta que contém os scripts utilizados para obtenção dos resultados. Esses scripts dependem do código definido em `ees`.
 
 Os quatro principais objetivos do código são:
 
 - Avaliar os modelos do EES a partir do Python,
-- Realizar a análise paramétrica dos principais parâmetros operacionais de forma automatizada utilizando o Python,
-- Realizar a otimização dos modelos utilizando o Algoritmo Genérico, utilizando a biblioteca DEAP do Python,
+- Realizar a análise paramétrica dos principais parâmetros operacionais, de forma automatizada, utilizando o Python,
+- Realizar a otimização dos modelos utilizando o Algoritmo Genérico, implementado a partir da biblioteca [DEAP](https://deap.readthedocs.io/en/master/),
 - Gerar gráficos.
 
 ### Avaliar os modelos
@@ -68,7 +66,7 @@ Os resultados são obtidos a utilizando a classe `SolveModel` que é importada d
 - O path para o modelo do EES,
 - Um dicionário de inputs, em que as chaves são os nomes das variáveis como presentes no modelo e os valores são os valores desejados das variáveis,
 - Uma lista de outputs, ou seja, variáveis de saída que serão retornadas pelo EES, também como escritas nos modelos,
-- E um identificados de execução (runID), que é apenas uma forma de diferenciar diferentes rodadas de execução, ao invés de sobscrever os resultados anteriores.
+- E um identificador de execução (runID), que é uma forma de diferenciar diferentes rodadas de execução (evita sobscrever os resultados anteriores).
 
 ```Python
 from scripts.config import EES_exe
@@ -90,16 +88,16 @@ SolveModel(EES_exe, EES_model, inputs, outputs, runID=runID)
 
 ### Análise paramétrica
 
-Nesse caso, foi utilizada a mesma lógica da avaliação dos modelos, entretanto a classe responsável, `ParametricStudies` (importada de ees.parametric), constrói um arquivo macro que engloba a avaliação dos modelos $n x m$ vezes, em que $n$ é o número de parâmetros a serem avaliados e $m$ o número de valores avaliados para determinado parâmetro.
+Nesse caso, foi utilizada a mesma lógica da avaliação dos modelos, entretanto a classe responsável, `ParametricStudies` (importada de ees.parametric), constrói um arquivo macro que engloba a avaliação dos modelos $n \times m$ vezes, em que $n$ é o número de parâmetros a serem avaliados e $m$ o número de valores avaliados para determinado parâmetro.
 
 `ParametricStudies` requer:
 
 - O path para o executável do EES,
 - O path para o modelo do EES,
 - Um dicionário de inputs,
-- Um dicinário das faixas a serem avaliadas, em que as chaves são as variáveis, e os valores são lista de valores a serem avaliados para determinada variável
+- Um dicinário das faixas a serem avaliadas, em que as chaves são as variáveis, e os valores são lista de valores a serem avaliados para determinada variável,
 - Uma lista de outputs,
-- E um identificados de execução (runID)
+- E um identificador de execução (runID).
 
 ```Python
 from ees.parametric import ParametricStudies
@@ -129,20 +127,22 @@ Exemplos de scripts para análise paramétrica estão presentes em `scripts/para
 
 ### Otimização
 
-Quanto à otimização utilizando Algoritmo Genético, não foi possível utilizar o método dos arquivos macro. Isso porque o Algoritmo precisa saber a aptidão de cada possível resposta durante a execução, para determinar qual a melhor. Portanto, foi necessário utilizar uma conexão DDE.
+Quanto à otimização utilizando Algoritmo Genético, não foi possível utilizar o método dos arquivos macro. Isso porque o Algoritmo precisa saber a aptidão de cada possível resposta durante a execução para determinar qual a melhor. Portanto, foi necessário utilizar uma conexão DDE.
 
-DDE, ou _Dynamic Data Exchange_, é um protocolo de transferência de dados entre aplicações no Windows. Com isso, é possível que um o Python envie comandos para serem executados no EES, como: "Abrir arquivo modelo.EES", "importar variavel_1, variabel_2 do clipboard", "avaliar modelo", "exportar variavel_3, variavel_4 para clipboard". Utilizando as funcionalidades de importar e exportar para o clipboard, é possível fornecer e receber dados provenientes de cada execução do EES de forma dinâmica.
+DDE, ou _Dynamic Data Exchange_, é um protocolo de transferência de dados entre aplicações no Windows. Com isso, é possível que um o Python envie comandos para serem executados no EES, como: "Abrir arquivo modelo.EES", "importar variavel_1, variabel_2 do clipboard", "avaliar modelo", "exportar variavel_3, variavel_4 para clipboard".
 
-Para isso é utilizada a classe `GAOptimizationStudy` importada de ees.optimization. Essa classe requer:
+Utilizando as funcionalidades de importar e exportar para o clipboard, é possível fornecer e receber dados provenientes de cada execução do EES de forma dinâmica.
+
+Para isso é utilizada a classe `GAOptimizationStudy`, importada de ees.optimization. Essa classe requer:
 
 - O path para o executável do EES,
 - O path para o modelo do EES,
 - Um dicionário de inputs,
 - Uma lista de outputs,
-- Um identificados de execução (runID)
-- Um dicionário das faixas de operação das variáveis de decisão, em que as chaves são os nomes das variáveis de decisão e os valores são tuplas cujo primeior valor é o limite inferior e o segundo é o limite superior,
-- Um dicionário da variável alvo, especificando a variável alvo, sua string de display e o tipo de otimização (max ou min),
-- E um dicionário das configurações do GA (ver exemplo),
+- Um identificador de execução (runID),
+- Um dicionário das faixas de operação das variáveis de decisão, em que as chaves são os nomes das variáveis e os valores são tuplas, cujo primeior valor é o limite inferior e o segundo é o limite superior,
+- Um dicionário da variável alvo, especificando a variável alvo, sua _string_ de display e o tipo de otimização (max ou min),
+- E um dicionário das configurações do GA (ver exemplo).
 
 ```Python
 from scripts.config import EES_exe
@@ -165,7 +165,11 @@ decision_variables = {
     "m": (0.01, 0.10)
 }
 
-target_variable = {"target_variable": "efficiency", "target_variable_display": r"$ \eta_{sys} $", "problem": "max"}
+target_variable = {
+    "target_variable": "efficiency", 
+    "target_variable_display": r"$ \eta_{sys} $", 
+    "problem": "max"
+}
 
 ga_config = {
     'seed': 5,
@@ -184,4 +188,5 @@ eesopt.set_decision_variables(decision_variables)
 eesopt.set_target_variable(**target_variable)
 eesopt.execute(ga_config)
 ```
+
 Exemplos completos de scripts para otimização estão presentes em `scripts/optimization/optimization_cases.py`
