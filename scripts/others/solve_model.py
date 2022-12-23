@@ -210,5 +210,5 @@ def NH3_model():
 
 
 if __name__ == "__main__":
-    LiBr_model()
+    # LiBr_model()
     NH3_model()

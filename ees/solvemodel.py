@@ -123,7 +123,7 @@ class SolveModel:
         """Executes the macro file on EES via subprocess module. Returns DataFrame with results."""
 
         if "EES.exe" in str(subprocess.check_output('tasklist')):
-            self.log(">> Uma instância do EES foi encontrada aberta. Ela será fechada.")
+            print(">> Uma instância do EES foi encontrada aberta. Ela será fechada.")
             os.system("taskkill /f /im  EES.exe")
 
         # Set input datfile and output filename.
